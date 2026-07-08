@@ -19,49 +19,49 @@
     }
     .card {
       background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 22px;
-      margin-bottom: 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+      padding: 16px;
+      margin-bottom: 16px;
     }
     h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
+      margin: 0 0 4px;
+      font-size: 22px;
     }
     .subtitle {
-      margin: 0 0 20px;
+      margin: 0 0 14px;
       color: #6b7280;
-      line-height: 1.7;
-      font-size: 14px;
+      line-height: 1.6;
+      font-size: 13px;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      gap: 10px;
     }
     .grid3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
+      gap: 10px;
     }
     .field {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 4px;
     }
     .field-full {
       grid-column: 1 / -1;
     }
     label {
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
     }
     input, textarea {
       width: 100%;
-      padding: 12px 13px;
+      padding: 10px 12px;
       border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 16px;
+      border-radius: 8px;
+      font-size: 15px;
       outline: none;
       background: #fff;
       -webkit-appearance: none;
@@ -77,15 +77,15 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
     .hint {
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 1.5;
+      color: #9ca3af;
+      font-size: 11px;
+      line-height: 1.4;
     }
     .buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 24px;
+      gap: 8px;
+      margin-top: 14px;
     }
     .buttons .btn-hero {
       flex: 1 1 auto;
@@ -135,44 +135,80 @@
       border: 1px solid #fecaca;
     }
     .result {
-      margin-top: 24px;
-      padding: 18px;
-      border-radius: 14px;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       display: none;
     }
     .result h2 {
-      margin: 0 0 14px;
-      font-size: 18px;
+      margin: 0 0 10px;
+      font-size: 16px;
     }
     .result-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
+      gap: 10px;
     }
     .metric {
       background: #fff;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 10px;
+      padding: 10px;
       border: 1px solid #e5e7eb;
     }
     .metric .name {
       color: #6b7280;
-      font-size: 13px;
-      margin-bottom: 8px;
+      font-size: 12px;
+      margin-bottom: 4px;
     }
     .metric .value {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       color: #111827;
     }
     .note-text {
-      margin-top: 16px;
-      color: #4b5563;
-      font-size: 13px;
-      line-height: 1.7;
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.6;
       word-break: break-word;
+    }
+    .save-strip {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .save-strip.saved {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .save-strip .save-status {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #065f46;
+      margin-top: 8px;
+      display: none;
+    }
+    .save-strip.saved .save-status {
+      display: block;
+    }
+    .save-strip .save-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .save-strip .save-btn-wrap {
+      display: flex;
+      gap: 8px;
+    }
+    .save-btn-wrap button {
+      flex: 1;
     }
     .error {
       margin-top: 18px;
@@ -226,13 +262,13 @@
       position: sticky;
       top: 0;
     }
-    td.note-cell {
+    td.note-cell, td.landcover-cell {
       max-width: 140px;
       white-space: normal;
       word-break: break-word;
       cursor: pointer;
     }
-    td.note-cell:hover {
+    td.note-cell:hover, td.landcover-cell:hover {
       background: #eff6ff;
     }
     .note-edit-input {
@@ -281,11 +317,12 @@
       50% { opacity: 0.5; }
     }
     @media (max-width: 680px) {
-      .container { margin: 12px auto; }
-      .grid, .grid3, .result-grid { grid-template-columns: 1fr; }
-      .card { padding: 18px; }
-      h1 { font-size: 22px; }
+      .container { margin: 8px auto; }
+      .grid, .grid3, .result-grid, .save-strip .save-grid { grid-template-columns: 1fr; }
+      .card { padding: 14px; }
+      h1 { font-size: 20px; }
       .buttons .btn-hero { min-width: 100%; }
+      .save-btn-wrap { flex-direction: column; }
       button { width: 100%; }
     }
   </style>
@@ -335,8 +372,8 @@
       <div class="buttons">
         <button id="autoLocateBtn" class="hero btn-hero" type="button">📍 一键定位并计算</button>
         <button id="calcBtn" class="primary" type="button">计算太阳天顶角</button>
-        <button id="nowBtn" class="secondary" type="button">🕐 当前时间</button>
-        <button id="whuBtn" class="secondary" type="button">🎓 武大坐标</button>
+        <button id="nowBtn" class="secondary" type="button">🕐 更新时间</button>
+        <button id="whuBtn" class="secondary" type="button">🎓 武大坐标示例</button>
       </div>
 
       <div id="error" class="error"></div>
@@ -360,20 +397,35 @@
         </div>
         <div id="detail" class="note-text"></div>
 
-        <!-- 备注与保存 -->
-        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px;">
-          <div class="field">
-            <label for="noteInput">📝 备注（可选）</label>
-            <input id="noteInput" type="text" placeholder="如：样点编号、地物类型、天气状况等">
+        <!-- 保存区 -->
+        <div id="save-strip" class="save-strip">
+          <div class="save-grid">
+            <div class="field">
+              <label for="landCoverInput">🌿 当前位置对应的地物类型（可选）</label>
+              <input id="landCoverInput" type="text" list="landCoverList" placeholder="选择或输入地物类型">
+              <datalist id="landCoverList">
+                <option value="柏油路面">
+                <option value="水泥地面">
+                <option value="裸土">
+                <option value="草地">
+                <option value="水体">
+                <option value="钢铁">
+                <option value="沙地">
+                <option value="雪/冰">
+              </datalist>
+            </div>
+            <div class="field">
+              <label for="noteInput">📝 备注（可选）</label>
+              <input id="noteInput" type="text" placeholder="样点编号、天气等">
+            </div>
           </div>
-          <button id="saveBtn" class="accent" type="button">💾 保存本条记录</button>
+          <div class="save-btn-wrap">
+            <button id="saveBtn" class="accent" type="button">💾 保存本条记录</button>
+          </div>
+          <div id="saveStatus" class="save-status">✓ 已保存</div>
         </div>
 
         <div id="successMsg" class="success"></div>
-
-        <div class="note-text">
-          说明：太阳天顶角 = 90° − 太阳高度角。本工具采用常用太阳位置近似算法，适合野外地物光谱测量记录使用。
-        </div>
       </div>
     </div>
 
@@ -383,8 +435,8 @@
         <h2>📋 历史记录</h2>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <span id="recordCount" class="badge" style="display: none;"></span>
-          <button id="exportBtn" class="secondary" type="button">📥 导出 JSON</button>
-          <button id="exportCsvBtn" class="secondary" type="button">📊 导出 CSV</button>
+          <button id="exportBtn" class="secondary" type="button">📥 导出为JSON</button>
+          <button id="exportCsvBtn" class="secondary" type="button">📊 导出为CSV</button>
           <button id="clearAllBtn" class="danger" type="button">🗑 清空全部</button>
         </div>
       </div>
@@ -668,6 +720,13 @@
       getEl("detail").innerHTML = detailHtml;
 
       getEl("result").style.display = "block";
+
+      // 重置保存区状态（新计算结果，未保存）
+      resetSaveStrip();
+
+      // 自动滚动到结果区，聚焦地物类型输入框
+      getEl("result").scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(function() { getEl("landCoverInput").focus(); }, 400);
     }
 
     // ===================== 本地存储管理 =====================
@@ -691,12 +750,30 @@
     }
 
     // ===================== 保存本条记录 =====================
+    var lastSavedId = null;  // 最近一次保存的记录 ID，用于防重复保存
+
+    function resetSaveStrip() {
+      var strip = getEl("save-strip");
+      if (strip) strip.classList.remove("saved");
+      getEl("saveStatus").style.display = "none";
+      getEl("saveBtn").innerHTML = "💾 保存本条记录";
+      lastSavedId = null;
+    }
+
     function saveCurrentRecord() {
       if (!lastCalcResult) {
         showError("请先完成一次计算后再保存。");
         return;
       }
 
+      // 如果当前结果已保存过，提示用户
+      if (lastSavedId != null) {
+        if (!confirm("当前计算结果似乎已经保存过了。\n\n是否重复保存同一个结果？")) {
+          return;
+        }
+      }
+
+      var landCover = getEl("landCoverInput").value.trim();
       var note = getEl("noteInput").value.trim();
       var r = lastCalcResult;
 
@@ -714,6 +791,7 @@
         trueSolarTime: r.trueSolarTime,
         gpsAccuracy: r.gpsAccuracy,
         gpsTimestamp: r.gpsTimestamp,
+        landCover: landCover,
         note: note,
         savedAt: new Date().toISOString()
       };
@@ -723,6 +801,14 @@
       saveRecordsToStorage(records);
       renderRecordTable();
 
+      // 标记已保存，切换状态
+      lastSavedId = record.id;
+      var strip = getEl("save-strip");
+      if (strip) strip.classList.add("saved");
+      getEl("saveStatus").style.display = "block";
+      getEl("saveBtn").innerHTML = "✅ 已保存";
+
+      getEl("landCoverInput").value = "";
       getEl("noteInput").value = "";
       showSuccess("✅ 记录已保存！", 2000);
     }
@@ -747,7 +833,7 @@
       html += '<th>#</th><th>日期</th><th>时间</th><th>纬度</th><th>经度</th>';
       html += '<th>定位精度</th>';
       html += '<th>天顶角</th><th>高度角</th><th>方位角</th>';
-      html += '<th>备注</th><th>操作</th>';
+      html += '<th>地物类型</th><th>备注</th><th>操作</th>';
       html += '</tr></thead><tbody>';
 
       for (var i = 0; i < records.length; i++) {
@@ -762,8 +848,10 @@
         html += '<td>' + (rec.zenith != null ? rec.zenith.toFixed(3) + "°" : "--") + '</td>';
         html += '<td>' + (rec.elevation != null ? rec.elevation.toFixed(3) + "°" : "--") + '</td>';
         html += '<td>' + (rec.azimuth != null ? rec.azimuth.toFixed(3) + "°" : "--") + '</td>';
+        html += '<td class="landcover-cell" data-id="' + rec.id + '" data-landcover="' + escAttr(rec.landCover || "") + '">'
+             + escHtml(rec.landCover || "（双击编辑）") + '</td>';
         html += '<td class="note-cell" data-id="' + rec.id + '" data-note="' + escAttr(rec.note || "") + '">'
-             + escHtml(rec.note || "（点击编辑）") + '</td>';
+             + escHtml(rec.note || "（双击编辑）") + '</td>';
         html += '<td><div class="action-btns">';
         html += '<button class="secondary" onclick="deleteRecord(' + rec.id + ')">删除</button>';
         html += '</div></td>';
@@ -773,8 +861,9 @@
       html += '</tbody></table></div>';
       panel.innerHTML = html;
 
-      // 绑定备注双击编辑
-      bindNoteEdit();
+      // 绑定双击编辑
+      bindCellEdit("note-cell", "data-note", updateNoteInStorage);
+      bindCellEdit("landcover-cell", "data-landcover", updateLandCoverInStorage);
     }
 
     function formatAccuracy(acc) {
@@ -789,18 +878,18 @@
       return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // ===================== 备注编辑（双击） =====================
-    function bindNoteEdit() {
-      var cells = document.querySelectorAll("td.note-cell");
+    // ===================== 双击编辑（通用） =====================
+    function bindCellEdit(className, dataAttr, updateFn) {
+      var cells = document.querySelectorAll("td." + className);
       for (var i = 0; i < cells.length; i++) {
         cells[i].addEventListener("dblclick", function(e) {
           var td = e.currentTarget;
           var id = Number(td.getAttribute("data-id"));
-          var currentNote = td.getAttribute("data-note");
+          var currentValue = td.getAttribute(dataAttr);
 
           var input = document.createElement("input");
           input.type = "text";
-          input.value = currentNote;
+          input.value = currentValue;
           input.className = "note-edit-input";
           input.style.width = "100%";
           td.innerHTML = "";
@@ -809,8 +898,8 @@
           input.select();
 
           function finishEdit() {
-            var newNote = input.value.trim();
-            updateNoteInStorage(id, newNote);
+            var newValue = input.value.trim();
+            updateFn(id, newValue);
             renderRecordTable();
           }
 
@@ -828,6 +917,17 @@
       for (var i = 0; i < records.length; i++) {
         if (records[i].id === id) {
           records[i].note = newNote;
+          break;
+        }
+      }
+      saveRecordsToStorage(records);
+    }
+
+    function updateLandCoverInStorage(id, newLandCover) {
+      var records = getRecords();
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].id === id) {
+          records[i].landCover = newLandCover;
           break;
         }
       }
@@ -880,6 +980,7 @@
           太阳方位角_deg: r.azimuth != null ? r.azimuth.toFixed(3) : "",
           太阳赤纬_deg: r.decl != null ? r.decl.toFixed(3) : "",
           真太阳时_小时: r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : "",
+          地物类型: r.landCover || "",
           备注: r.note || "",
           保存时间: r.savedAt || ""
         };
@@ -909,7 +1010,7 @@
 
       var headers = ["编号", "测量日期", "测量时间", "时区", "纬度", "经度",
         "定位方式", "定位精度(米)", "太阳天顶角(°)", "太阳高度角(°)",
-        "太阳方位角(°)", "太阳赤纬(°)", "真太阳时(小时)", "备注", "保存时间"];
+        "太阳方位角(°)", "太阳赤纬(°)", "真太阳时(小时)", "地物类型", "备注", "保存时间"];
 
       function csvEscape(val) {
         if (val == null) return "";
@@ -938,6 +1039,7 @@
           csvEscape(r.azimuth != null ? r.azimuth.toFixed(3) : ""),
           csvEscape(r.decl != null ? r.decl.toFixed(3) : ""),
           csvEscape(r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : ""),
+          csvEscape(r.landCover || ""),
           csvEscape(r.note || ""),
           csvEscape(r.savedAt || "")
         ];
