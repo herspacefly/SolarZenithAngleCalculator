@@ -81,6 +81,26 @@
       font-size: 11px;
       line-height: 1.4;
     }
+    .checkbox-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border-radius: 4px;
+      -webkit-appearance: checkbox;
+      appearance: checkbox;
+      flex: 0 0 auto;
+      accent-color: #2563eb;
+    }
     .buttons {
       display: flex;
       flex-wrap: wrap;
@@ -174,6 +194,47 @@
       line-height: 1.6;
       word-break: break-word;
     }
+    .night-warning {
+      display: none;
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .chart-card {
+      margin-top: 14px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .chart-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+    .chart-wrap {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+    }
+    #solarPathCanvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+    }
+    .chart-hint {
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.5;
+    }
     .save-strip {
       margin-top: 14px;
       padding: 14px;
@@ -206,9 +267,77 @@
     .save-strip .save-btn-wrap {
       display: flex;
       gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
     }
     .save-btn-wrap button {
       flex: 1;
+    }
+    .file-input-hidden {
+      display: none;
+    }
+    .image-preview-wrap {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .image-preview-body {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .image-preview-body img {
+      width: 112px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+    }
+    .image-preview-actions {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      min-width: 180px;
+      flex-wrap: wrap;
+    }
+    .image-preview-actions button {
+      flex: 1;
+      min-width: 140px;
+      padding: 9px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    .image-status {
+      margin-top: 6px;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .thumb-cell {
+      white-space: normal;
+      min-width: 96px;
+    }
+    .record-thumb {
+      width: 52px;
+      height: 42px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+    }
+    .thumb-download-btn {
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      background: #e5e7eb;
+      color: #111827;
     }
     .error {
       margin-top: 18px;
@@ -247,7 +376,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
-      min-width: 700px;
+      min-width: 780px;
     }
     th, td {
       padding: 10px 8px;
@@ -323,7 +452,11 @@
       h1 { font-size: 20px; }
       .buttons .btn-hero { min-width: 100%; }
       .save-btn-wrap { flex-direction: column; }
+      .image-preview-body { flex-direction: column; }
+      .image-preview-actions { width: 100%; min-width: 0; }
       button { width: 100%; }
+      .checkbox-row { margin-top: 4px; }
+      #solarPathCanvas { height: 240px; }
     }
   </style>
 </head>
@@ -353,6 +486,10 @@
         <div class="field">
           <label for="timezone">时区 UTC 偏移</label>
           <input id="timezone" type="number" inputmode="decimal" step="0.5" value="8">
+          <label class="checkbox-row" for="dstEnabled">
+            <input id="dstEnabled" type="checkbox">
+            启用夏令时 (DST)
+          </label>
           <div class="hint">中国标准时间填 8。</div>
         </div>
 
@@ -381,6 +518,7 @@
       <!-- ===== 计算结果 ===== -->
       <div id="result" class="result">
         <h2>计算结果</h2>
+        <div id="nightWarning" class="night-warning"></div>
         <div class="result-grid">
           <div class="metric">
             <div class="name">太阳天顶角</div>
@@ -396,6 +534,14 @@
           </div>
         </div>
         <div id="detail" class="note-text"></div>
+
+        <div class="chart-card">
+          <h3>当日太阳轨迹图</h3>
+          <div class="chart-wrap">
+            <canvas id="solarPathCanvas"></canvas>
+          </div>
+          <div class="chart-hint">X 轴为当地时间 00:00-24:00，Y 轴为太阳高度角；红点为当前测量时间。</div>
+        </div>
 
         <!-- 保存区 -->
         <div id="save-strip" class="save-strip">
@@ -417,6 +563,18 @@
             <div class="field">
               <label for="noteInput">📝 备注（可选）</label>
               <input id="noteInput" type="text" placeholder="样点编号、天气等">
+              <input id="imageInput" class="file-input-hidden" type="file" accept="image/*" capture="environment">
+              <button id="photoBtn" class="secondary" type="button">📷 拍照 / 上传图片</button>
+              <div id="imageStatus" class="image-status"></div>
+            </div>
+          </div>
+          <div id="imagePreviewWrap" class="image-preview-wrap">
+            <div class="image-preview-body">
+              <img id="imagePreview" src="" alt="图片预览">
+              <div class="image-preview-actions">
+                <button id="downloadPendingImageBtn" class="secondary" type="button">⬇️ 下载该图片</button>
+                <button id="removeImageBtn" class="danger" type="button">移除图片</button>
+              </div>
             </div>
           </div>
           <div class="save-btn-wrap">
@@ -495,6 +653,7 @@
       getEl("latitude").value = "30.540000";
       getEl("longitude").value = "114.360000";
       getEl("timezone").value = "8";
+      getEl("dstEnabled").checked = false;
     }
 
     // ===================== 一键 GPS 定位 =====================
@@ -654,6 +813,204 @@
       };
     }
 
+    // ===================== 当日太阳轨迹图 =====================
+    function minutesToTimeValue(minutes) {
+      minutes = Math.max(0, Math.min(1439, Math.round(minutes)));
+      return pad2(Math.floor(minutes / 60)) + ":" + pad2(minutes % 60) + ":00";
+    }
+
+    function parseTimeToMinutes(timeValue) {
+      var tm = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(timeValue);
+      if (!tm) return null;
+      return Number(tm[1]) * 60 + Number(tm[2]) + Number(tm[3] || 0) / 60;
+    }
+
+    function buildSolarPathData(latitude, longitude, dateValue, timezone) {
+      var points = [];
+      for (var minutes = 0; minutes < 1440; minutes += 30) {
+        var position = computeSolarPosition(latitude, longitude, dateValue, minutesToTimeValue(minutes), timezone);
+        if (position) {
+          points.push({
+            minutes: minutes,
+            elevation: position.elevation,
+            azimuth: position.azimuth
+          });
+        }
+      }
+
+      var lastPosition = computeSolarPosition(latitude, longitude, dateValue, "23:59:00", timezone);
+      if (lastPosition) {
+        points.push({
+          minutes: 1439,
+          elevation: lastPosition.elevation,
+          azimuth: lastPosition.azimuth
+        });
+      }
+      return points;
+    }
+
+    function drawSolarPathChart(points, currentMinutes, currentElevation, timeValue) {
+      var canvas = getEl("solarPathCanvas");
+      if (!canvas || !canvas.getContext || !points.length) return;
+
+      var rect = canvas.getBoundingClientRect();
+      var width = Math.max(320, Math.round(rect.width || canvas.clientWidth || 760));
+      var height = Math.max(220, Math.round(rect.height || 280));
+      var ratio = window.devicePixelRatio || 1;
+      canvas.width = width * ratio;
+      canvas.height = height * ratio;
+
+      var ctx = canvas.getContext("2d");
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      var padLeft = 48;
+      var padRight = 18;
+      var padTop = 18;
+      var padBottom = 34;
+      var plotWidth = width - padLeft - padRight;
+      var plotHeight = height - padTop - padBottom;
+      var minElevation = currentElevation;
+
+      for (var i = 0; i < points.length; i++) {
+        minElevation = Math.min(minElevation, points[i].elevation);
+      }
+
+      var yMax = 90;
+      var yMin = Math.min(0, Math.floor(minElevation / 10) * 10);
+      if (yMin > -10) yMin = -10;
+      if (yMin < -90) yMin = -90;
+
+      function xForMinute(minutes) {
+        return padLeft + (minutes / 1440) * plotWidth;
+      }
+      function yForElevation(elevation) {
+        var clamped = Math.max(yMin, Math.min(yMax, elevation));
+        return padTop + ((yMax - clamped) / (yMax - yMin)) * plotHeight;
+      }
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+
+      for (var elev = 0; elev <= 90; elev += 30) {
+        var gy = yForElevation(elev);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, gy);
+        ctx.lineTo(width - padRight, gy);
+        ctx.stroke();
+        ctx.fillText(elev + "°", padLeft - 8, gy);
+      }
+
+      if (yMin < 0) {
+        for (var neg = -30; neg >= yMin; neg -= 30) {
+          var ngy = yForElevation(neg);
+          ctx.beginPath();
+          ctx.moveTo(padLeft, ngy);
+          ctx.lineTo(width - padRight, ngy);
+          ctx.stroke();
+          ctx.fillText(neg + "°", padLeft - 8, ngy);
+        }
+      }
+
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.beginPath();
+      ctx.moveTo(padLeft, padTop);
+      ctx.lineTo(padLeft, height - padBottom);
+      ctx.lineTo(width - padRight, height - padBottom);
+      ctx.stroke();
+
+      var zeroY = yForElevation(0);
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, zeroY);
+      ctx.lineTo(width - padRight, zeroY);
+      ctx.stroke();
+
+      ctx.fillStyle = "#6b7280";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      for (var hour = 0; hour <= 24; hour += 6) {
+        var tx = xForMinute(hour * 60);
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.beginPath();
+        ctx.moveTo(tx, padTop);
+        ctx.lineTo(tx, height - padBottom);
+        ctx.stroke();
+        ctx.fillText(pad2(hour) + ":00", tx, height - padBottom + 8);
+      }
+
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (var p = 0; p < points.length - 1; p++) {
+        var px = xForMinute(points[p].minutes);
+        var py = yForElevation(points[p].elevation);
+        var nextX = xForMinute(points[p + 1].minutes);
+        var nextY = yForElevation(points[p + 1].elevation);
+        var midX = (px + nextX) / 2;
+        var midY = (py + nextY) / 2;
+        if (p === 0) ctx.moveTo(px, py);
+        ctx.quadraticCurveTo(px, py, midX, midY);
+      }
+      var lastPoint = points[points.length - 1];
+      ctx.lineTo(xForMinute(lastPoint.minutes), yForElevation(lastPoint.elevation));
+      ctx.stroke();
+
+      if (isFiniteNumber(currentMinutes) && isFiniteNumber(currentElevation)) {
+        var cx = xForMinute(currentMinutes);
+        var cy = yForElevation(currentElevation);
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        var label = timeValue.slice(0, 5) + "  " + currentElevation.toFixed(1) + "°";
+        ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        var labelWidth = ctx.measureText(label).width + 14;
+        var labelX = Math.min(width - padRight - labelWidth / 2, Math.max(padLeft + labelWidth / 2, cx + 42));
+        var labelY = Math.max(padTop + 8, Math.min(height - padBottom - 28, cy - 28));
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "#fecaca";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(labelX - labelWidth / 2, labelY - 12, labelWidth, 24, 8);
+        } else {
+          ctx.rect(labelX - labelWidth / 2, labelY - 12, labelWidth, 24);
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#b91c1c";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, labelX, labelY);
+      }
+    }
+
+    function updateNightWarning(elevation) {
+      var box = getEl("nightWarning");
+      if (!box) return;
+      if (elevation <= 0) {
+        box.textContent = "⚠️ 警告：当前时刻太阳已落山（或未升起），太阳高度角为负值，不适合进行光谱测量！";
+        box.style.display = "block";
+      } else {
+        box.textContent = "";
+        box.style.display = "none";
+      }
+    }
+
     // ===================== 计算按钮逻辑 =====================
     var lastCalcResult = null; // 暂存最近一次计算结果，供保存使用
 
@@ -666,6 +1023,8 @@
       var latitude = Number(getEl("latitude").value);
       var longitude = Number(getEl("longitude").value);
       var timezone = Number(getEl("timezone").value);
+      var dstEnabled = getEl("dstEnabled").checked;
+      var effectiveTimezone = timezone + (dstEnabled ? 1 : 0);
 
       if (!dateValue || !timeValue || !isFiniteNumber(latitude) || !isFiniteNumber(longitude) || !isFiniteNumber(timezone)) {
         showError("请完整输入测量日期、测量时间、纬度、经度和时区。");
@@ -684,7 +1043,7 @@
         return;
       }
 
-      var result = computeSolarPosition(latitude, longitude, dateValue, timeValue, timezone);
+      var result = computeSolarPosition(latitude, longitude, dateValue, timeValue, effectiveTimezone);
       if (!result) {
         showError("日期或时间格式无效，请重新输入。");
         return;
@@ -695,6 +1054,8 @@
         dateValue: dateValue,
         timeValue: timeValue,
         timezone: timezone,
+        effectiveTimezone: effectiveTimezone,
+        dstEnabled: dstEnabled,
         latitude: latitude,
         longitude: longitude,
         zenith: result.zenith,
@@ -712,14 +1073,22 @@
       getEl("azimuth").innerHTML = result.azimuth.toFixed(3) + "°";
       var detailHtml =
         "测量时间：" + dateValue + " " + timeValue + "，时区：UTC" + (timezone >= 0 ? "+" : "") + timezone +
+        (dstEnabled ? "（DST 启用，实际按 UTC" + (effectiveTimezone >= 0 ? "+" : "") + effectiveTimezone + " 计算）" : "") +
         "；纬度：" + latitude.toFixed(6) + "°，经度：" + longitude.toFixed(6) + "°。" +
         "<br>太阳赤纬约为 " + result.decl.toFixed(3) + "°，真太阳时约为 " + (result.trueSolarTime / 60).toFixed(3) + " 小时。";
       if (lastGpsAccuracy != null) {
         detailHtml += "<br>📍 坐标来源：GPS 定位，精度约 " + (lastGpsAccuracy < 1 ? lastGpsAccuracy.toFixed(1) : Math.round(lastGpsAccuracy)) + " 米";
       }
       getEl("detail").innerHTML = detailHtml;
+      updateNightWarning(result.elevation);
 
       getEl("result").style.display = "block";
+      drawSolarPathChart(
+        buildSolarPathData(latitude, longitude, dateValue, effectiveTimezone),
+        parseTimeToMinutes(timeValue),
+        result.elevation,
+        timeValue
+      );
 
       // 重置保存区状态（新计算结果，未保存）
       resetSaveStrip();
@@ -744,9 +1113,143 @@
     function saveRecordsToStorage(records) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        return true;
       } catch (e) {
         showError("存储空间不足！请导出记录后清理部分数据。");
+        return false;
       }
+    }
+
+    // ===================== 图片压缩与下载 =====================
+    var pendingImageBase64 = null;
+
+    function formatTimestampForFilename(date) {
+      return date.getFullYear() + pad2(date.getMonth() + 1) + pad2(date.getDate()) + "_" +
+             pad2(date.getHours()) + pad2(date.getMinutes()) + pad2(date.getSeconds());
+    }
+
+    function getImageFilename(record) {
+      if (record && record.date && record.time) {
+        return "spectrum_record_" + String(record.date).replace(/-/g, "") + "_" +
+          String(record.time).replace(/:/g, "").slice(0, 6) + ".jpg";
+      }
+      return "spectrum_record_" + formatTimestampForFilename(new Date()) + ".jpg";
+    }
+
+    function setImageStatus(message) {
+      var status = getEl("imageStatus");
+      if (status) status.textContent = message || "";
+    }
+
+    function showPendingImage(base64) {
+      pendingImageBase64 = base64;
+      getEl("imagePreview").src = base64;
+      getEl("imagePreviewWrap").style.display = "block";
+    }
+
+    function clearPendingImage() {
+      pendingImageBase64 = null;
+      getEl("imagePreview").src = "";
+      getEl("imagePreviewWrap").style.display = "none";
+      getEl("imageInput").value = "";
+      setImageStatus("");
+    }
+
+    function compressImageFile(file) {
+      return new Promise(function(resolve, reject) {
+        if (!file || !/^image\//.test(file.type)) {
+          reject(new Error("请选择图片文件。"));
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onerror = function() { reject(new Error("图片读取失败。")); };
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onerror = function() { reject(new Error("图片加载失败，请更换图片重试。")); };
+          img.onload = function() {
+            var maxSide = 1280;
+            var width = img.naturalWidth || img.width;
+            var height = img.naturalHeight || img.height;
+            var scale = Math.min(1, maxSide / Math.max(width, height));
+            var targetWidth = Math.max(1, Math.round(width * scale));
+            var targetHeight = Math.max(1, Math.round(height * scale));
+            var canvas = document.createElement("canvas");
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
+            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+            resolve(canvas.toDataURL("image/jpeg", 0.7));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function handleImageSelect(e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      setImageStatus("正在压缩图片...");
+      compressImageFile(file).then(function(base64) {
+        showPendingImage(base64);
+        var sizeKb = Math.round(base64.length * 0.75 / 1024);
+        setImageStatus("图片已压缩，约 " + sizeKb + " KB。");
+      }).catch(function(err) {
+        clearPendingImage();
+        setImageStatus(err.message || "图片处理失败。");
+      });
+    }
+
+    function base64ToBlob(base64) {
+      var parts = base64.split(",");
+      var mimeMatch = parts[0].match(/:(.*?);/);
+      var mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      var binary = atob(parts[1]);
+      var length = binary.length;
+      var bytes = new Uint8Array(length);
+      for (var i = 0; i < length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: mime });
+    }
+
+    function downloadBlob(blob, filename) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadBase64Image(base64, filename) {
+      if (!base64) return;
+      downloadBlob(base64ToBlob(base64), filename || getImageFilename());
+    }
+
+    function downloadPendingImage() {
+      if (!pendingImageBase64) {
+        setImageStatus("请先拍照或上传图片。");
+        return;
+      }
+      downloadBase64Image(pendingImageBase64, getImageFilename());
+    }
+
+    function downloadRecordImage(id) {
+      var records = getRecords();
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].id === id && records[i].imageBase64) {
+          downloadBase64Image(records[i].imageBase64, getImageFilename(records[i]));
+          return;
+        }
+      }
+      showError("未找到该记录的图片。");
     }
 
     // ===================== 保存本条记录 =====================
@@ -757,6 +1260,7 @@
       if (strip) strip.classList.remove("saved");
       getEl("saveStatus").style.display = "none";
       getEl("saveBtn").innerHTML = "💾 保存本条记录";
+      clearPendingImage();
       lastSavedId = null;
     }
 
@@ -782,6 +1286,8 @@
         date: r.dateValue,
         time: r.timeValue,
         timezone: r.timezone,
+        effectiveTimezone: r.effectiveTimezone,
+        dstEnabled: r.dstEnabled,
         latitude: r.latitude,
         longitude: r.longitude,
         zenith: r.zenith,
@@ -793,12 +1299,13 @@
         gpsTimestamp: r.gpsTimestamp,
         landCover: landCover,
         note: note,
+        imageBase64: pendingImageBase64,
         savedAt: new Date().toISOString()
       };
 
       var records = getRecords();
       records.unshift(record);
-      saveRecordsToStorage(records);
+      if (!saveRecordsToStorage(records)) return;
       renderRecordTable();
 
       // 标记已保存，切换状态
@@ -810,6 +1317,7 @@
 
       getEl("landCoverInput").value = "";
       getEl("noteInput").value = "";
+      clearPendingImage();
       showSuccess("✅ 记录已保存！", 2000);
     }
 
@@ -833,7 +1341,7 @@
       html += '<th>#</th><th>日期</th><th>时间</th><th>纬度</th><th>经度</th>';
       html += '<th>定位精度</th>';
       html += '<th>天顶角</th><th>高度角</th><th>方位角</th>';
-      html += '<th>地物类型</th><th>备注</th><th>操作</th>';
+      html += '<th>地物类型</th><th>备注</th><th>图片</th><th>操作</th>';
       html += '</tr></thead><tbody>';
 
       for (var i = 0; i < records.length; i++) {
@@ -852,6 +1360,12 @@
              + escHtml(rec.landCover || "（双击编辑）") + '</td>';
         html += '<td class="note-cell" data-id="' + rec.id + '" data-note="' + escAttr(rec.note || "") + '">'
              + escHtml(rec.note || "（双击编辑）") + '</td>';
+        if (rec.imageBase64) {
+          html += '<td class="thumb-cell"><img class="record-thumb" src="' + escAttr(rec.imageBase64) + '" alt="记录图片">'
+               + '<button class="thumb-download-btn" type="button" onclick="downloadRecordImage(' + rec.id + ')">⬇️ 下载</button></td>';
+        } else {
+          html += '<td class="thumb-cell"><span style="color:#9ca3af;">无图片</span></td>';
+        }
         html += '<td><div class="action-btns">';
         html += '<button class="secondary" onclick="deleteRecord(' + rec.id + ')">删除</button>';
         html += '</div></td>';
@@ -876,6 +1390,16 @@
     }
     function escAttr(str) {
       return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function getExportRecords(records) {
+      return records.map(function(record) {
+        var clone = JSON.parse(JSON.stringify(record));
+        clone.hasImage = clone.imageBase64 ? "是" : "否";
+        delete clone.imageBase64;
+        delete clone.image;
+        return clone;
+      });
     }
 
     // ===================== 双击编辑（通用） =====================
@@ -965,12 +1489,15 @@
         return;
       }
 
-      var exportData = records.map(function(r) {
+      var exportRecords = getExportRecords(records);
+      var exportData = exportRecords.map(function(r) {
         return {
           编号: r.id,
           测量日期: r.date,
           测量时间: r.time,
           时区: "UTC" + (r.timezone >= 0 ? "+" : "") + r.timezone,
+          夏令时DST: r.dstEnabled ? "是" : "否",
+          实际UTC偏移: r.effectiveTimezone != null ? "UTC" + (r.effectiveTimezone >= 0 ? "+" : "") + r.effectiveTimezone : "",
           纬度: r.latitude != null ? r.latitude.toFixed(6) : "",
           经度: r.longitude != null ? r.longitude.toFixed(6) : "",
           定位方式: r.gpsAccuracy != null ? "GPS" : "手动",
@@ -982,6 +1509,7 @@
           真太阳时_小时: r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : "",
           地物类型: r.landCover || "",
           备注: r.note || "",
+          有图片: r.hasImage || "否",
           保存时间: r.savedAt || ""
         };
       });
@@ -997,7 +1525,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccess("✅ 已导出 " + records.length + " 条记录 (JSON)。", 3000);
+      showSuccess("✅ 已导出 " + records.length + " 条记录 (JSON，不含图片数据)。", 3000);
     }
 
     // ===================== 导出 CSV =====================
@@ -1008,9 +1536,10 @@
         return;
       }
 
-      var headers = ["编号", "测量日期", "测量时间", "时区", "纬度", "经度",
+      var exportRecords = getExportRecords(records);
+      var headers = ["编号", "测量日期", "测量时间", "时区", "夏令时DST", "实际UTC偏移", "纬度", "经度",
         "定位方式", "定位精度(米)", "太阳天顶角(°)", "太阳高度角(°)",
-        "太阳方位角(°)", "太阳赤纬(°)", "真太阳时(小时)", "地物类型", "备注", "保存时间"];
+        "太阳方位角(°)", "太阳赤纬(°)", "真太阳时(小时)", "地物类型", "备注", "有图片", "保存时间"];
 
       function csvEscape(val) {
         if (val == null) return "";
@@ -1023,13 +1552,15 @@
       }
 
       var rows = [headers.join(",")];
-      for (var i = 0; i < records.length; i++) {
-        var r = records[i];
+      for (var i = 0; i < exportRecords.length; i++) {
+        var r = exportRecords[i];
         var row = [
           csvEscape(r.id),
           csvEscape(r.date),
           csvEscape(r.time),
           csvEscape("UTC" + (r.timezone >= 0 ? "+" : "") + r.timezone),
+          csvEscape(r.dstEnabled ? "是" : "否"),
+          csvEscape(r.effectiveTimezone != null ? "UTC" + (r.effectiveTimezone >= 0 ? "+" : "") + r.effectiveTimezone : ""),
           csvEscape(r.latitude != null ? r.latitude.toFixed(6) : ""),
           csvEscape(r.longitude != null ? r.longitude.toFixed(6) : ""),
           csvEscape(r.gpsAccuracy != null ? "GPS" : "手动"),
@@ -1041,6 +1572,7 @@
           csvEscape(r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : ""),
           csvEscape(r.landCover || ""),
           csvEscape(r.note || ""),
+          csvEscape(r.hasImage || "否"),
           csvEscape(r.savedAt || "")
         ];
         rows.push(row.join(","));
@@ -1057,7 +1589,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccess("✅ 已导出 " + records.length + " 条记录 (CSV)。", 3000);
+      showSuccess("✅ 已导出 " + records.length + " 条记录 (CSV，不含图片数据)。", 3000);
     }
 
     // ===================== 页面初始化 =====================
@@ -1070,6 +1602,10 @@
       getEl("exportBtn").onclick = exportRecords;
       getEl("exportCsvBtn").onclick = exportCsv;
       getEl("clearAllBtn").onclick = clearAllRecords;
+      getEl("photoBtn").onclick = function() { getEl("imageInput").click(); };
+      getEl("imageInput").addEventListener("change", handleImageSelect);
+      getEl("downloadPendingImageBtn").onclick = downloadPendingImage;
+      getEl("removeImageBtn").onclick = clearPendingImage;
 
       fillWHUExample();
       setCurrentTime();
