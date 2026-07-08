@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>太阳天顶角计算器</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 0 14px 40px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    .subtitle {
+      margin: 0 0 20px;
+      color: #6b7280;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .field-full {
+      grid-column: 1 / -1;
+    }
+    label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+      font-family: inherit;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 44px;
+    }
+    input:focus, textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .hint {
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .buttons .btn-hero {
+      flex: 1 1 auto;
+      min-width: 200px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .primary {
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+    }
+    .hero {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 14px 22px;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+    }
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .accent {
+      background: #059669;
+      color: #fff;
+      font-weight: 700;
+    }
+    .danger {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .result {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      display: none;
+    }
+    .result h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .metric {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #e5e7eb;
+    }
+    .metric .name {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .metric .value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #111827;
+    }
+    .note-text {
+      margin-top: 16px;
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+    .error {
+      margin-top: 18px;
+      color: #b91c1c;
+      font-weight: 600;
+      display: none;
+      line-height: 1.6;
+    }
+    .success {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #ecfdf5;
+      color: #065f46;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+      line-height: 1.6;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .record-table-wrap {
+      margin-top: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 700px;
+    }
+    th, td {
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+    th {
+      background: #f9fafb;
+      color: #6b7280;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    td.note-cell {
+      max-width: 140px;
+      white-space: normal;
+      word-break: break-word;
+      cursor: pointer;
+    }
+    td.note-cell:hover {
+      background: #eff6ff;
+    }
+    .note-edit-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #2563eb;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .action-btns {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+    .action-btns button {
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+    .empty-hint {
+      text-align: center;
+      color: #9ca3af;
+      padding: 30px 0;
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5e7eb;
+      color: #4b5563;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      height: 28px;
+      box-sizing: border-box;
+    }
+    .locating {
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @media (max-width: 680px) {
+      .container { margin: 12px auto; }
+      .grid, .grid3, .result-grid { grid-template-columns: 1fr; }
+      .card { padding: 18px; }
+      h1 { font-size: 22px; }
+      .buttons .btn-hero { min-width: 100%; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ==================== 第一块：参数输入与计算 ==================== -->
+    <div class="card">
+      <h1>太阳天顶角计算器</h1>
+      <p class="subtitle">
+        输入实地测量日期、时间、经纬度和时区，计算太阳天顶角。中国地区通常使用 UTC+8；东经、北纬填正数。
+      </p>
+
+      <div class="grid">
+        <div class="field">
+          <label for="dateInput">测量日期</label>
+          <input id="dateInput" type="date">
+          <div class="hint">填写光谱文件实际采集日期。</div>
+        </div>
+
+        <div class="field">
+          <label for="timeInput">测量时间</label>
+          <input id="timeInput" type="time" step="1">
+          <div class="hint">填写光谱文件实际采集时刻。</div>
+        </div>
+
+        <div class="field">
+          <label for="timezone">时区 UTC 偏移</label>
+          <input id="timezone" type="number" inputmode="decimal" step="0.5" value="8">
+          <div class="hint">中国标准时间填 8。</div>
+        </div>
+
+        <div class="field">
+          <label for="latitude">纬度 Latitude</label>
+          <input id="latitude" type="number" inputmode="decimal" step="0.000001" placeholder="例如：30.540000">
+          <div class="hint">北纬为正，南纬为负。</div>
+        </div>
+
+        <div class="field">
+          <label for="longitude">经度 Longitude</label>
+          <input id="longitude" type="number" inputmode="decimal" step="0.000001" placeholder="例如：114.360000">
+          <div class="hint">东经为正，西经为负。</div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="autoLocateBtn" class="hero btn-hero" type="button">📍 一键定位并计算</button>
+        <button id="calcBtn" class="primary" type="button">计算太阳天顶角</button>
+        <button id="nowBtn" class="secondary" type="button">🕐 当前时间</button>
+        <button id="whuBtn" class="secondary" type="button">🎓 武大坐标</button>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <!-- ===== 计算结果 ===== -->
+      <div id="result" class="result">
+        <h2>计算结果</h2>
+        <div class="result-grid">
+          <div class="metric">
+            <div class="name">太阳天顶角</div>
+            <div id="zenith" class="value">--</div>
+          </div>
+          <div class="metric">
+            <div class="name">太阳高度角</div>
+            <div id="elevation" class="value">--</div>
+          </div>
+          <div class="metric">
+            <div class="name">太阳方位角</div>
+            <div id="azimuth" class="value">--</div>
+          </div>
+        </div>
+        <div id="detail" class="note-text"></div>
+
+        <!-- 备注与保存 -->
+        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div class="field">
+            <label for="noteInput">📝 备注（可选）</label>
+            <input id="noteInput" type="text" placeholder="如：样点编号、地物类型、天气状况等">
+          </div>
+          <button id="saveBtn" class="accent" type="button">💾 保存本条记录</button>
+        </div>
+
+        <div id="successMsg" class="success"></div>
+
+        <div class="note-text">
+          说明：太阳天顶角 = 90° − 太阳高度角。本工具采用常用太阳位置近似算法，适合野外地物光谱测量记录使用。
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 第二块：历史记录管理 ==================== -->
+    <div class="card">
+      <div class="section-title">
+        <h2>📋 历史记录</h2>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span id="recordCount" class="badge" style="display: none;"></span>
+          <button id="exportBtn" class="secondary" type="button">📥 导出 JSON</button>
+          <button id="exportCsvBtn" class="secondary" type="button">📊 导出 CSV</button>
+          <button id="clearAllBtn" class="danger" type="button">🗑 清空全部</button>
+        </div>
+      </div>
+
+      <div id="recordPanel">
+        <div class="empty-hint">暂无保存的记录。计算并保存后，记录将显示在此处。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ===================== 工具函数 =====================
+    function getEl(id) { return document.getElementById(id); }
+    function degToRad(deg) { return deg * Math.PI / 180; }
+    function radToDeg(rad) { return rad * 180 / Math.PI; }
+    function fixAngle(angle) {
+      angle = angle % 360;
+      return angle < 0 ? angle + 360 : angle;
+    }
+    function pad2(n) {
+      n = Number(n);
+      return n < 10 ? "0" + n : String(n);
+    }
+    function isFiniteNumber(n) {
+      return typeof n === "number" && isFinite(n);
+    }
+
+    // ===================== 提示信息 =====================
+    function showError(message) {
+      var errorBox = getEl("error");
+      getEl("result").style.display = "none";
+      errorBox.innerHTML = message;
+      errorBox.style.display = "block";
+    }
+    function hideError() {
+      getEl("error").style.display = "none";
+      getEl("error").innerHTML = "";
+    }
+    function showSuccess(message, duration) {
+      var box = getEl("successMsg");
+      box.innerHTML = message;
+      box.style.display = "block";
+      if (duration) {
+        setTimeout(function() { box.style.display = "none"; }, duration);
+      }
+    }
+
+    // ===================== 表单快捷操作 =====================
+    function setCurrentTime() {
+      var now = new Date();
+      getEl("dateInput").value = now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+      getEl("timeInput").value = pad2(now.getHours()) + ":" + pad2(now.getMinutes()) + ":" + pad2(now.getSeconds());
+    }
+    function fillWHUExample() {
+      getEl("latitude").value = "30.540000";
+      getEl("longitude").value = "114.360000";
+      getEl("timezone").value = "8";
+    }
+
+    // ===================== 一键 GPS 定位 =====================
+    var lastGpsAccuracy = null;    // 最近一次 GPS 定位精度（米），手动输入时为 null
+    var lastGpsTimestamp = null;   // 最近一次 GPS 定位时间戳
+
+    function autoLocate() {
+      hideError();
+      getEl("successMsg").style.display = "none";
+      setCurrentTime();
+
+      if (!navigator.geolocation) {
+        showError("您的浏览器不支持地理定位功能，请手动输入经纬度。");
+        return;
+      }
+
+      var btn = getEl("autoLocateBtn");
+      var originalText = btn.innerHTML;
+      btn.innerHTML = "⏳ 正在定位并计算...";
+      btn.disabled = true;
+      btn.classList.add("locating");
+
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          getEl("latitude").value = pos.coords.latitude.toFixed(6);
+          getEl("longitude").value = pos.coords.longitude.toFixed(6);
+
+          // 存储定位精度与时间戳
+          lastGpsAccuracy = (pos.coords.accuracy != null) ? pos.coords.accuracy : null;
+          lastGpsTimestamp = pos.timestamp || Date.now();
+
+          var accMsg = (lastGpsAccuracy != null)
+            ? "，定位精度约 " + (lastGpsAccuracy < 1 ? lastGpsAccuracy.toFixed(1) : Math.round(lastGpsAccuracy)) + " 米"
+            : "";
+
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          btn.classList.remove("locating");
+
+          // 定位成功后自动计算
+          calculateSolarZenith();
+          showSuccess("✅ 定位成功，已自动计算" + accMsg + "。", 4000);
+        },
+        function(err) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          btn.classList.remove("locating");
+          var msg;
+          switch(err.code) {
+            case err.PERMISSION_DENIED: msg = "定位授权被拒绝，请在浏览器设置中允许位置访问。"; break;
+            case err.POSITION_UNAVAILABLE: msg = "无法获取位置信息，请检查设备 GPS 是否已开启。"; break;
+            case err.TIMEOUT: msg = "定位超时，请重试或手动输入经纬度。"; break;
+            default: msg = "定位失败：" + err.message;
+          }
+          showError(msg);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+      );
+    }
+
+    // ===================== 日期时间解析 =====================
+    function parseInputDateTime(dateValue, timeValue, timezone) {
+      var dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+      var tm = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(timeValue);
+      if (!dm || !tm) return null;
+
+      var year = Number(dm[1]);
+      var month = Number(dm[2]);
+      var day = Number(dm[3]);
+      var hour = Number(tm[1]);
+      var minute = Number(tm[2]);
+      var second = Number(tm[3] || 0);
+
+      if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) return null;
+
+      var utcMillis = Date.UTC(year, month - 1, day, hour, minute, second) - timezone * 60 * 60 * 1000;
+      return {
+        year: year, month: month, day: day,
+        hour: hour, minute: minute, second: second,
+        utcMillis: utcMillis
+      };
+    }
+
+    // ===================== 核心：太阳天顶角计算 =====================
+    function computeSolarPosition(latitude, longitude, dateValue, timeValue, timezone) {
+      var dt = parseInputDateTime(dateValue, timeValue, timezone);
+      if (!dt) return null;
+
+      var jd = dt.utcMillis / 86400000 + 2440587.5;
+      var T = (jd - 2451545.0) / 36525.0;
+
+      var L0 = fixAngle(280.46646 + T * (36000.76983 + T * 0.0003032));
+      var M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+      var e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+
+      var C = Math.sin(degToRad(M)) * (1.914602 - T * (0.004817 + 0.000014 * T)) +
+              Math.sin(degToRad(2 * M)) * (0.019993 - 0.000101 * T) +
+              Math.sin(degToRad(3 * M)) * 0.000289;
+      var trueLong = L0 + C;
+      var omega = 125.04 - 1934.136 * T;
+      var apparentLong = trueLong - 0.00569 - 0.00478 * Math.sin(degToRad(omega));
+
+      var meanObliq = 23 + (26 + ((21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60)) / 60;
+      var obliqCorr = meanObliq + 0.00256 * Math.cos(degToRad(omega));
+
+      var decl = radToDeg(Math.asin(Math.sin(degToRad(obliqCorr)) * Math.sin(degToRad(apparentLong))));
+
+      var y = Math.tan(degToRad(obliqCorr) / 2);
+      var y2 = y * y;
+      var eqTime = 4 * radToDeg(
+        y2 * Math.sin(2 * degToRad(L0)) -
+        2 * e * Math.sin(degToRad(M)) +
+        4 * e * y2 * Math.sin(degToRad(M)) * Math.cos(2 * degToRad(L0)) -
+        0.5 * y2 * y2 * Math.sin(4 * degToRad(L0)) -
+        1.25 * e * e * Math.sin(2 * degToRad(M))
+      );
+
+      var minutes = dt.hour * 60 + dt.minute + dt.second / 60;
+      var trueSolarTime = minutes + eqTime + 4 * longitude - 60 * timezone;
+      trueSolarTime = ((trueSolarTime % 1440) + 1440) % 1440;
+
+      var hourAngle = trueSolarTime / 4 - 180;
+      if (hourAngle < -180) hourAngle += 360;
+
+      var latRad = degToRad(latitude);
+      var declRad = degToRad(decl);
+      var haRad = degToRad(hourAngle);
+
+      var cosZenith = Math.sin(latRad) * Math.sin(declRad) +
+                      Math.cos(latRad) * Math.cos(declRad) * Math.cos(haRad);
+      if (cosZenith > 1) cosZenith = 1;
+      if (cosZenith < -1) cosZenith = -1;
+
+      var zenith = radToDeg(Math.acos(cosZenith));
+      var elevation = 90 - zenith;
+
+      var azimuth;
+      var zenithRad = degToRad(zenith);
+      if (Math.abs(Math.sin(zenithRad)) < 0.00000001) {
+        azimuth = 0;
+      } else {
+        var azArg = ((Math.sin(latRad) * Math.cos(zenithRad)) - Math.sin(declRad)) /
+                    (Math.cos(latRad) * Math.sin(zenithRad));
+        if (azArg > 1) azArg = 1;
+        if (azArg < -1) azArg = -1;
+
+        var az = radToDeg(Math.acos(azArg));
+        azimuth = hourAngle > 0 ? (az + 180) % 360 : (540 - az) % 360;
+      }
+
+      return {
+        zenith: zenith,
+        elevation: elevation,
+        azimuth: azimuth,
+        decl: decl,
+        trueSolarTime: trueSolarTime
+      };
+    }
+
+    // ===================== 计算按钮逻辑 =====================
+    var lastCalcResult = null; // 暂存最近一次计算结果，供保存使用
+
+    function calculateSolarZenith() {
+      hideError();
+      getEl("successMsg").style.display = "none";
+
+      var dateValue = getEl("dateInput").value;
+      var timeValue = getEl("timeInput").value;
+      var latitude = Number(getEl("latitude").value);
+      var longitude = Number(getEl("longitude").value);
+      var timezone = Number(getEl("timezone").value);
+
+      if (!dateValue || !timeValue || !isFiniteNumber(latitude) || !isFiniteNumber(longitude) || !isFiniteNumber(timezone)) {
+        showError("请完整输入测量日期、测量时间、纬度、经度和时区。");
+        return;
+      }
+      if (latitude < -90 || latitude > 90) {
+        showError("纬度范围应为 -90 到 90。");
+        return;
+      }
+      if (longitude < -180 || longitude > 180) {
+        showError("经度范围应为 -180 到 180。");
+        return;
+      }
+      if (timezone < -12 || timezone > 14) {
+        showError("时区通常应在 -12 到 +14 之间；中国标准时间填 8。");
+        return;
+      }
+
+      var result = computeSolarPosition(latitude, longitude, dateValue, timeValue, timezone);
+      if (!result) {
+        showError("日期或时间格式无效，请重新输入。");
+        return;
+      }
+
+      // 暂存供保存
+      lastCalcResult = {
+        dateValue: dateValue,
+        timeValue: timeValue,
+        timezone: timezone,
+        latitude: latitude,
+        longitude: longitude,
+        zenith: result.zenith,
+        elevation: result.elevation,
+        azimuth: result.azimuth,
+        decl: result.decl,
+        trueSolarTime: result.trueSolarTime,
+        gpsAccuracy: lastGpsAccuracy,
+        gpsTimestamp: lastGpsTimestamp
+      };
+
+      // 显示结果
+      getEl("zenith").innerHTML = result.zenith.toFixed(3) + "°";
+      getEl("elevation").innerHTML = result.elevation.toFixed(3) + "°";
+      getEl("azimuth").innerHTML = result.azimuth.toFixed(3) + "°";
+      var detailHtml =
+        "测量时间：" + dateValue + " " + timeValue + "，时区：UTC" + (timezone >= 0 ? "+" : "") + timezone +
+        "；纬度：" + latitude.toFixed(6) + "°，经度：" + longitude.toFixed(6) + "°。" +
+        "<br>太阳赤纬约为 " + result.decl.toFixed(3) + "°，真太阳时约为 " + (result.trueSolarTime / 60).toFixed(3) + " 小时。";
+      if (lastGpsAccuracy != null) {
+        detailHtml += "<br>📍 坐标来源：GPS 定位，精度约 " + (lastGpsAccuracy < 1 ? lastGpsAccuracy.toFixed(1) : Math.round(lastGpsAccuracy)) + " 米";
+      }
+      getEl("detail").innerHTML = detailHtml;
+
+      getEl("result").style.display = "block";
+    }
+
+    // ===================== 本地存储管理 =====================
+    var STORAGE_KEY = "solarZenithRecords_v2";
+
+    function getRecords() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecordsToStorage(records) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      } catch (e) {
+        showError("存储空间不足！请导出记录后清理部分数据。");
+      }
+    }
+
+    // ===================== 保存本条记录 =====================
+    function saveCurrentRecord() {
+      if (!lastCalcResult) {
+        showError("请先完成一次计算后再保存。");
+        return;
+      }
+
+      var note = getEl("noteInput").value.trim();
+      var r = lastCalcResult;
+
+      var record = {
+        id: Date.now(),
+        date: r.dateValue,
+        time: r.timeValue,
+        timezone: r.timezone,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        zenith: r.zenith,
+        elevation: r.elevation,
+        azimuth: r.azimuth,
+        decl: r.decl,
+        trueSolarTime: r.trueSolarTime,
+        gpsAccuracy: r.gpsAccuracy,
+        gpsTimestamp: r.gpsTimestamp,
+        note: note,
+        savedAt: new Date().toISOString()
+      };
+
+      var records = getRecords();
+      records.unshift(record);
+      saveRecordsToStorage(records);
+      renderRecordTable();
+
+      getEl("noteInput").value = "";
+      showSuccess("✅ 记录已保存！", 2000);
+    }
+
+    // ===================== 渲染历史记录表格 =====================
+    function renderRecordTable() {
+      var records = getRecords();
+      var panel = getEl("recordPanel");
+      var countBadge = getEl("recordCount");
+
+      if (records.length === 0) {
+        panel.innerHTML = '<div class="empty-hint">暂无保存的记录。计算并保存后，记录将显示在此处。</div>';
+        countBadge.style.display = "none";
+        return;
+      }
+
+      countBadge.style.display = "inline-block";
+      countBadge.textContent = "共 " + records.length + " 条";
+
+      var html = '<div class="record-table-wrap"><table>';
+      html += '<thead><tr>';
+      html += '<th>#</th><th>日期</th><th>时间</th><th>纬度</th><th>经度</th>';
+      html += '<th>定位精度</th>';
+      html += '<th>天顶角</th><th>高度角</th><th>方位角</th>';
+      html += '<th>备注</th><th>操作</th>';
+      html += '</tr></thead><tbody>';
+
+      for (var i = 0; i < records.length; i++) {
+        var rec = records[i];
+        html += '<tr>';
+        html += '<td>' + (records.length - i) + '</td>';
+        html += '<td>' + rec.date + '</td>';
+        html += '<td>' + rec.time + '</td>';
+        html += '<td>' + (rec.latitude != null ? rec.latitude.toFixed(6) : "--") + '</td>';
+        html += '<td>' + (rec.longitude != null ? rec.longitude.toFixed(6) : "--") + '</td>';
+        html += '<td>' + formatAccuracy(rec.gpsAccuracy) + '</td>';
+        html += '<td>' + (rec.zenith != null ? rec.zenith.toFixed(3) + "°" : "--") + '</td>';
+        html += '<td>' + (rec.elevation != null ? rec.elevation.toFixed(3) + "°" : "--") + '</td>';
+        html += '<td>' + (rec.azimuth != null ? rec.azimuth.toFixed(3) + "°" : "--") + '</td>';
+        html += '<td class="note-cell" data-id="' + rec.id + '" data-note="' + escAttr(rec.note || "") + '">'
+             + escHtml(rec.note || "（点击编辑）") + '</td>';
+        html += '<td><div class="action-btns">';
+        html += '<button class="secondary" onclick="deleteRecord(' + rec.id + ')">删除</button>';
+        html += '</div></td>';
+        html += '</tr>';
+      }
+
+      html += '</tbody></table></div>';
+      panel.innerHTML = html;
+
+      // 绑定备注双击编辑
+      bindNoteEdit();
+    }
+
+    function formatAccuracy(acc) {
+      if (acc == null) return "手动输入";
+      if (acc < 1) return acc.toFixed(1) + " m";
+      return Math.round(acc) + " m";
+    }
+    function escHtml(str) {
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function escAttr(str) {
+      return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // ===================== 备注编辑（双击） =====================
+    function bindNoteEdit() {
+      var cells = document.querySelectorAll("td.note-cell");
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].addEventListener("dblclick", function(e) {
+          var td = e.currentTarget;
+          var id = Number(td.getAttribute("data-id"));
+          var currentNote = td.getAttribute("data-note");
+
+          var input = document.createElement("input");
+          input.type = "text";
+          input.value = currentNote;
+          input.className = "note-edit-input";
+          input.style.width = "100%";
+          td.innerHTML = "";
+          td.appendChild(input);
+          input.focus();
+          input.select();
+
+          function finishEdit() {
+            var newNote = input.value.trim();
+            updateNoteInStorage(id, newNote);
+            renderRecordTable();
+          }
+
+          input.addEventListener("blur", finishEdit);
+          input.addEventListener("keydown", function(ev) {
+            if (ev.key === "Enter") finishEdit();
+            if (ev.key === "Escape") renderRecordTable();
+          });
+        });
+      }
+    }
+
+    function updateNoteInStorage(id, newNote) {
+      var records = getRecords();
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].id === id) {
+          records[i].note = newNote;
+          break;
+        }
+      }
+      saveRecordsToStorage(records);
+    }
+
+    // ===================== 删除记录 =====================
+    function deleteRecord(id) {
+      if (!confirm("确定要删除这条记录吗？此操作不可撤销。")) return;
+
+      var records = getRecords();
+      records = records.filter(function(r) { return r.id !== id; });
+      saveRecordsToStorage(records);
+      renderRecordTable();
+    }
+
+    // ===================== 清空全部记录 =====================
+    function clearAllRecords() {
+      var records = getRecords();
+      if (records.length === 0) {
+        showError("暂无记录可清空。");
+        return;
+      }
+      if (!confirm("确定要清空全部 " + records.length + " 条记录吗？此操作不可撤销。\n\n建议先导出备份。")) return;
+
+      saveRecordsToStorage([]);
+      renderRecordTable();
+    }
+
+    // ===================== 导出 JSON =====================
+    function exportRecords() {
+      var records = getRecords();
+      if (records.length === 0) {
+        showError("暂无记录可导出。");
+        return;
+      }
+
+      var exportData = records.map(function(r) {
+        return {
+          编号: r.id,
+          测量日期: r.date,
+          测量时间: r.time,
+          时区: "UTC" + (r.timezone >= 0 ? "+" : "") + r.timezone,
+          纬度: r.latitude != null ? r.latitude.toFixed(6) : "",
+          经度: r.longitude != null ? r.longitude.toFixed(6) : "",
+          定位方式: r.gpsAccuracy != null ? "GPS" : "手动",
+          定位精度_米: r.gpsAccuracy != null ? (r.gpsAccuracy < 1 ? r.gpsAccuracy.toFixed(1) : Math.round(r.gpsAccuracy)) : "",
+          太阳天顶角_deg: r.zenith != null ? r.zenith.toFixed(3) : "",
+          太阳高度角_deg: r.elevation != null ? r.elevation.toFixed(3) : "",
+          太阳方位角_deg: r.azimuth != null ? r.azimuth.toFixed(3) : "",
+          太阳赤纬_deg: r.decl != null ? r.decl.toFixed(3) : "",
+          真太阳时_小时: r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : "",
+          备注: r.note || "",
+          保存时间: r.savedAt || ""
+        };
+      });
+
+      var jsonStr = JSON.stringify(exportData, null, 2);
+      var blob = new Blob(["\uFEFF" + jsonStr], { type: "application/json;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "太阳天顶角记录_" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccess("✅ 已导出 " + records.length + " 条记录 (JSON)。", 3000);
+    }
+
+    // ===================== 导出 CSV =====================
+    function exportCsv() {
+      var records = getRecords();
+      if (records.length === 0) {
+        showError("暂无记录可导出。");
+        return;
+      }
+
+      var headers = ["编号", "测量日期", "测量时间", "时区", "纬度", "经度",
+        "定位方式", "定位精度(米)", "太阳天顶角(°)", "太阳高度角(°)",
+        "太阳方位角(°)", "太阳赤纬(°)", "真太阳时(小时)", "备注", "保存时间"];
+
+      function csvEscape(val) {
+        if (val == null) return "";
+        var s = String(val);
+        if (s.indexOf(",") !== -1 || s.indexOf("\"") !== -1 || s.indexOf("\n") !== -1) {
+          s = s.replace(/"/g, "\"\"");
+          return "\"" + s + "\"";
+        }
+        return s;
+      }
+
+      var rows = [headers.join(",")];
+      for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        var row = [
+          csvEscape(r.id),
+          csvEscape(r.date),
+          csvEscape(r.time),
+          csvEscape("UTC" + (r.timezone >= 0 ? "+" : "") + r.timezone),
+          csvEscape(r.latitude != null ? r.latitude.toFixed(6) : ""),
+          csvEscape(r.longitude != null ? r.longitude.toFixed(6) : ""),
+          csvEscape(r.gpsAccuracy != null ? "GPS" : "手动"),
+          csvEscape(r.gpsAccuracy != null ? (r.gpsAccuracy < 1 ? r.gpsAccuracy.toFixed(1) : Math.round(r.gpsAccuracy)) : ""),
+          csvEscape(r.zenith != null ? r.zenith.toFixed(3) : ""),
+          csvEscape(r.elevation != null ? r.elevation.toFixed(3) : ""),
+          csvEscape(r.azimuth != null ? r.azimuth.toFixed(3) : ""),
+          csvEscape(r.decl != null ? r.decl.toFixed(3) : ""),
+          csvEscape(r.trueSolarTime != null ? (r.trueSolarTime / 60).toFixed(3) : ""),
+          csvEscape(r.note || ""),
+          csvEscape(r.savedAt || "")
+        ];
+        rows.push(row.join(","));
+      }
+
+      var csvStr = "\uFEFF" + rows.join("\n");
+      var blob = new Blob([csvStr], { type: "text/csv;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "太阳天顶角记录_" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccess("✅ 已导出 " + records.length + " 条记录 (CSV)。", 3000);
+    }
+
+    // ===================== 页面初始化 =====================
+    function bindButtons() {
+      getEl("calcBtn").onclick = calculateSolarZenith;
+      getEl("autoLocateBtn").onclick = autoLocate;
+      getEl("whuBtn").onclick = fillWHUExample;
+      getEl("nowBtn").onclick = setCurrentTime;
+      getEl("saveBtn").onclick = saveCurrentRecord;
+      getEl("exportBtn").onclick = exportRecords;
+      getEl("exportCsvBtn").onclick = exportCsv;
+      getEl("clearAllBtn").onclick = clearAllRecords;
+
+      fillWHUExample();
+      setCurrentTime();
+      renderRecordTable();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindButtons);
+    } else {
+      bindButtons();
+    }
+  </script>
+</body>
+</html>
